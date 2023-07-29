@@ -2,14 +2,13 @@ import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
 
-img = cv.imread('katedrala.jpg')
+img = cv.imread('zaba.jpg')
 img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
 
 fig, ax = plt.subplots(2, 2, figsize=(12, 6))
 
 fig.suptitle('Interpolacija Zumiranja')
 zoom_parametar = 2.0 
-
 
 def zoomSlike(scale,slika):
     #Napravljene nove dimenzije slike
@@ -34,7 +33,7 @@ def zoomSlike(scale,slika):
 def interPolacijaNajblizegKomsije(zoomed,slika,scale):
     rows=slika.shape[0]
     cols=slika.shape[1]
-    rezultat=zoomed.copy()
+    rezultat=zoomed.copy().astype("int")
     for i in range(rows):
         for j in range(cols):
             if np.any(rezultat[i,j]==0):
@@ -45,10 +44,21 @@ def interPolacijaNajblizegKomsije(zoomed,slika,scale):
 def bilinearnaInterpolacija(zoomed):
     rows=zoomed.shape[0]
     cols=zoomed.shape[1]
-    bilinear=zoomed.copy()
-    for i in range(rows):
-        for j in range(cols):
-            pass
+    bilinear=zoomed.copy().astype("int")
+    #horiznotalni
+    for i in range(0,rows-1,2):
+        for j in range(1,cols-1,2):
+            bilinear[i,j]=(bilinear[i,j-1]+bilinear[i,j+1])//2
+    #vertikalini
+    for i in range(1,rows-1,2):
+        for j in range(0,cols-1,2):
+            bilinear[i,j]=(bilinear[i-1,j]+bilinear[i+1,j])//2
+    #srednji
+    for i in range(1,rows-1,2):
+        for j in range(1,cols-1,2):
+            bilinear[i,j]=(bilinear[i-1,j]+bilinear[i+1,j]+bilinear[i,j-1]+bilinear[i,j+1])//4
+
+    return bilinear
 
 
 #Originalna slika
@@ -72,7 +82,7 @@ ax[1,0].axis('off')
 
 #Bilinearnom interpolaciom
 ax[1,1].set_title('Slika sa bilinearnom interpolacijiom')
-ax[1,1].imshow(bilinearnaInterpolacija())
+ax[1,1].imshow(bilinearnaInterpolacija(zumiranaSlika))
 ax[1,1].axis('off')
 
 
