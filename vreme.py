@@ -2,7 +2,10 @@ import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
 import time
-
+"""
+Ovaj fajl sluzi za mernje perioda izvršavanja
+interpolacija.
+"""
 
 img = cv.imread('zaba.jpg')
 img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
