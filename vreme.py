@@ -1,14 +1,13 @@
 import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
+import time
+
 
 img = cv.imread('zaba.jpg')
 img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
+zoom_parametar = 2.0
 
-fig, ax = plt.subplots(2, 2, figsize=(12, 6))
-
-fig.suptitle('Interpolacija Zumiranja')
-zoom_parametar = 2.0 
 
 def zoomSlike(scale,slika):
     #Napravljene nove dimenzije slike
@@ -29,6 +28,8 @@ def zoomSlike(scale,slika):
             konacni_rezultat[i,j]=rezultat[i,j]
 
     return konacni_rezultat
+
+
 
 def interPolacijaNajblizegKomsije(zoomed,slika,scale):
     rows=slika.shape[0]
@@ -65,31 +66,35 @@ def bilinearnaInterpolacija(zoomed):
 
     return konacna_bilinear
 
+startZaZoom=time.time()
+zumirana=zoomSlike(zoom_parametar,img)
+endZaZoom=time.time()
+#vreme izvrsavanja zoom funkcije
+vremeZaZoom=endZaZoom-startZaZoom
 
-#Originalna slika
-ax[0,0].set_title('Originalna slika')
-ax[0,0].imshow(img)
-ax[0,0].axis('off')
+startZaNajb=time.time()
+najblizi=interPolacijaNajblizegKomsije(zumirana,img,zoom_parametar)
+endZaNajb=time.time()
+#vreme izvrsavanje interpolacije najbli. suseda
+vremeZaNajb=endZaNajb-startZaNajb
 
+startZaBil=time.time()
+bilinearna = bilinearnaInterpolacija(zumirana)
+endZaBil=time.time()
+#vreme izvrsavanja bilinearne interpolacije
+vremeZaBil=endZaBil-startZaBil
 
-#Zumiranje slike bez interpolacije
-
-zumiranaSlika=zoomSlike(zoom_parametar,img)
-ax[0,1].set_title('Zumirana slika bez interpolacije')
-ax[0,1].imshow(zumiranaSlika)
-ax[0,1].axis('off')
-
-
-#Interpolacija najblizeg komsije
-ax[1,0].set_title('Slika sa interpolacijom najblizeg suseda')
-ax[1,0].imshow(interPolacijaNajblizegKomsije(zumiranaSlika,img,zoom_parametar))
-ax[1,0].axis('off')
-
-
-#Bilinearnom interpolaciom
-ax[1,1].set_title('Slika sa bilinearnom interpolacijiom')
-ax[1,1].imshow(bilinearnaInterpolacija(zumiranaSlika))
-ax[1,1].axis('off')
+print(vremeZaZoom)
+print(vremeZaBil)
+print(vremeZaNajb)
 
 
+x = [vremeZaBil,vremeZaNajb]
+
+metode = ['Najbliži Sused', 'Bilinearna']
+
+plt.bar(metode, x, color=['red', 'blue'])
+plt.ylabel('Vreme (s)')
+plt.xlabel('Metode Interpolacije')
+plt.title('Vreme Izvršavanja Bilinearne i Najbližeg Suseda Interpolacije')
 plt.show()
